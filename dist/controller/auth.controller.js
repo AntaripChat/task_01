@@ -1,11 +1,21 @@
+import User from "../model/user.model.js";
 import bcrypt from 'bcrypt';
-const signup = (req, res) => {
+const signup = async (req, res) => {
     const UserData = {
         name: req.body.name,
         email: req.body.email,
         password: bcrypt.hashSync(req.body.password, 8),
     };
-    res.status(200).send(UserData);
+    try {
+        const user = await User.create(UserData);
+        res.status(200).send({ msg: `${user.name} Your data Save` });
+    }
+    catch (err) {
+        res.status(500).send({
+            msg: "Some Server Error"
+        });
+    }
+    ;
 };
 const signin = (req, res) => {
     const UserData = {
