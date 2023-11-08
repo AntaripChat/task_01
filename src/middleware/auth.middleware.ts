@@ -1,5 +1,7 @@
 import { NextFunction,Request,Response } from "express";
 import User from "../model/user.model.js";
+
+
 const userVali = async (req:Request,res:Response,next:NextFunction) =>{
     if(!req.body.name){
         return res.status(400).send({

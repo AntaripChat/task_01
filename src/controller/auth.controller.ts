@@ -1,6 +1,10 @@
 import { Request,Response } from "express";
 import User from "../model/user.model.js";
+import authConfig from "../config/auth.config.js";
 import bcrypt from 'bcrypt';
+import jsonwebtoken from "jsonwebtoken";
+
+const secret = authConfig.secret;
 
 const signup = async(req:Request,res:Response) =>{
     const UserData = {
@@ -19,13 +23,24 @@ const signup = async(req:Request,res:Response) =>{
     
 };
 
-const signin = (req:Request,res:Response) =>{
-    const UserData = {
-        email:req.body.email,
-        password:req.body.password
+const signin = async(req:Request,res:Response) =>{
+    const user = await User.findOne({email:req.body.email});
+    if(user === null){
+        return res.status(400).send({message:"invalid creds"});
+    };
+    const isPasswordValid = bcrypt.compareSync(req.body.password,user.password);
+    if(!isPasswordValid){
+        return res.status(400).send({message:"invalid creds"});
     };
 
-    res.status(200).send(UserData);
+    let token = jsonwebtoken.sign({email:user.email},secret,{expiresIn:86400});
+
+    res.status(200).send({
+        name:user.name,
+        email:user.email,
+        accessToken:token
+    });
+
 }
 
 
